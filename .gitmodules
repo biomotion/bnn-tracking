@@ -1,0 +1,6 @@
+[submodule "mahalanobis_3d_multi_object_tracking"]
+	path = mahalanobis_3d_multi_object_tracking
+	url = https://github.com/biomotion/mahalanobis_3d_multi_object_tracking
+[submodule "argoverse_baselinetracker"]
+	path = argoverse_baselinetracker
+	url = https://github.com/alliecc/argoverse_baselinetracker

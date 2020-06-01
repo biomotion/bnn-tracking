@@ -4,3 +4,6 @@
 [submodule "argoverse_baselinetracker"]
 	path = argoverse_baselinetracker
 	url = https://github.com/alliecc/argoverse_baselinetracker
+[submodule "argoverse_cbgs_kf_tracker"]
+	path = argoverse_cbgs_kf_tracker
+	url = https://github.com/johnwlambert/argoverse_cbgs_kf_tracker

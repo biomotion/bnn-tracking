@@ -5,6 +5,35 @@ FROM pytorch/pytorch:nightly-devel-cuda${CUDA_V}-cudnn${CUDNN_V}
 
 
 ENV DEBIAN_FRONTEND=noninteractive
+# install ROS 
+# ROS Setup
+# setup keys and source.list
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 && \
+    echo "deb http://packages.ros.org/ros/ubuntu xenial main" > /etc/apt/sources.list.d/ros1-latest.list
+# install bootstrap tools
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    python-rosdep \
+    python-rosinstall \
+    python-vcstools \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+# bootstrap rosdep
+RUN rosdep init \
+    && rosdep update
+# install ros packages
+ENV ROS_DISTRO kinetic
+RUN apt-get update && apt-get install -y \ 
+    ros-${ROS_DISTRO}-ros-core \
+    ros-${ROS_DISTRO}-perception \
+    ros-${ROS_DISTRO}-ddynamic-reconfigure \
+    ros-${ROS_DISTRO}-pcl-ros \
+    ros-${ROS_DISTRO}-pcl-conversions \
+    ros-${ROS_DISTRO}-tf-conversions \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+# setup entrypoint
+COPY ./ros_entrypoint.sh /
+ENTRYPOINT ["/ros_entrypoint.sh"]
 
 RUN apt-get update && \
     apt-get install -y \
@@ -31,7 +60,8 @@ RUN python3 -m pip install -U pip && \
         nuscenes-devkit \
         ninja yacs cython tqdm pyquaternion \
         cityscapesscripts \
-        apex
+        apex \
+	pptk
 
 RUN jupyter notebook --generate-config \
     && echo "c.NotebookApp.allow_root = True" >> /root/.jupyter/jupyter_notebook_config.py \
@@ -65,33 +95,3 @@ RUN git clone https://github.com/argoai/argoverse-api && cd argoverse-api && \
     wget https://s3.amazonaws.com/argoai-argoverse/hd_maps.tar.gz && \
     tar -zxvf hd_maps.tar.gz && \
     cd .. && pip3 install -e argoverse-api
-
-# # install ROS 
-# # ROS Setup
-# # setup keys and source.list
-# RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 && \
-#     echo "deb http://packages.ros.org/ros/ubuntu xenial main" > /etc/apt/sources.list.d/ros1-latest.list
-# # install bootstrap tools
-# RUN apt-get update && apt-get install --no-install-recommends -y \
-#     python-rosdep \
-#     python-rosinstall \
-#     python-vcstools \
-#     && apt-get clean \
-#     && rm -rf /var/lib/apt/lists/*
-# # bootstrap rosdep
-# RUN rosdep init \
-#     && rosdep update
-# # install ros packages
-# ENV ROS_DISTRO kinetic
-# RUN apt-get update && apt-get install -y \ 
-#     ros-${ROS_DISTRO}-ros-core \
-#     ros-${ROS_DISTRO}-perception \
-#     ros-${ROS_DISTRO}-ddynamic-reconfigure \
-#     ros-${ROS_DISTRO}-pcl-ros \
-#     ros-${ROS_DISTRO}-pcl-conversions \
-#     ros-${ROS_DISTRO}-tf-conversions \
-#     && apt-get clean \
-#     && rm -rf /var/lib/apt/lists/*
-# # setup entrypoint
-# COPY ./ros_entrypoint.sh /
-# ENTRYPOINT ["/ros_entrypoint.sh"]
